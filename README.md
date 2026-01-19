@@ -13,7 +13,7 @@ The study utilizes "Heart Disease Dataset" (available via Kaggle). The data incl
 ## Technical Pipeline
 
 ### Data Ingestion
-The raw dataset (`heart_cleveland_upload.csv`) is loaded into a structured format. The target label is standardized to `target` for consistency across the script.
+The raw dataset (`heart.csv`) is loaded into a structured format. The target label is standardized to `target` for consistency across the script.
 
 ### Dataset Partitioning
 The data is divided into training and testing subsets using an 82/18 split. This ensures a significant portion of the data is used for model learning while retaining a separate portion for unbiased performance testing.
