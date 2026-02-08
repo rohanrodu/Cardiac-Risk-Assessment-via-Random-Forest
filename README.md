@@ -48,5 +48,7 @@ A comprehensive classification report provides precision, recall, and F1-scores,
 - **Machine Learning:** scikit-learn (Modules: RandomForestClassifier, GridSearchCV, metrics)
 - **Visualization:** matplotlib or seaborn (for result plotting)
 
+---
+
 
 It consist of a txt file which is beginner friendly code directly copy and paste in vs code or colab or jupyter notebook
