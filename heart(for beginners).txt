@@ -1,0 +1,132 @@
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score,confusion_matrix
+
+
+df = pd.read_csv("/content/heart.csv")
+df.head(900)
+
+
+X = df.drop('target', axis=1)   # input features
+y = df['target']                # output label
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+cm = confusion_matrix(y_test, y_pred)  #   0    1
+                                       # 0 TN  FN
+                                       # 1 FN  TP
+
+print("Heart Disease Prediction Model")
+print("Model Accuracy:", accuracy * 100, "%")
+print(" Model's confusion matrixs",cm)
+
+
+"""| Feature                       | Normal / Healthy Range (0) | Risky / Unhealthy Range (1)          | Why It Matters                          |
+| ----------------------------- | -------------------------- | ------------------------------------ | --------------------------------------- |
+| **Age**                       | < 45 years                 | > 55 years                           | Risk increases with age                 |
+| **Sex**                       | Female (0)                 | Male (1)                             | Males have higher risk statistically    |
+| **Chest Pain (cp)**           | 2 (Non-anginal)            | 0 (Typical angina), 3 (Asymptomatic) | Severe or silent pain indicates disease |
+| **Resting BP (trestbps)**     | < 120 mmHg                 | ≥ 140 mmHg                           | High BP stresses the heart              |
+| **Cholesterol (chol)**        | < 200 mg/dL                | ≥ 240 mg/dL                          | High cholesterol blocks arteries        |
+| **Fasting Blood Sugar (fbs)** | ≤ 120 mg/dL (0)            | > 120 mg/dL (1)                      | Diabetes increases heart risk           |
+| **Rest ECG (restecg)**        | 0 (Normal)                 | 1 or 2 (Abnormal)                    | ECG changes show heart issues           |
+| **Max Heart Rate (thalach)**  | 77 – 150 bpm               | < 100 or > 150 bpm                   | Abnormal heart response                 |
+| **Exercise Angina (exang)**   | 0 (No pain)                | 1 (Pain during exercise)             | Strong heart disease indicator          |
+| **ST Depression (oldpeak)**   | 0 – 1                      | > 2                                  | Indicates heart stress                  |
+| **Slope**                     | 1 (Upsloping)              | 0 or 2                               | Abnormal ECG slope                      |
+| **Major Vessels (ca)**        | 0                          | 1 – 3                                | More blockage → higher risk             |
+| **Thal**                      | 1 (Normal)                 | 2 or 3 (Defect)                      | Blood flow abnormalities                |
+"""
+
+print("\nEnter Patient Details:")
+
+patient_data = {
+    'age': [int(input("Age: "))],
+    'sex': [int(input("Sex (1=Male, 0=Female): "))],
+    'cp': [int(input("Chest Pain Type (0-3): "))],
+    'trestbps': [int(input("Resting Blood Pressure: "))],
+    'chol': [int(input("Cholesterol Level: "))],
+    'fbs': [int(input("Fasting Blood Sugar (1=Yes, 0=No): "))],
+    'restecg': [int(input("Rest ECG (0-2): "))],
+    'thalach': [int(input("Max Heart Rate: "))],
+    'exang': [int(input("Exercise Induced Angina (1=Yes, 0=No): "))],
+    'oldpeak': [float(input("ST Depression (0.0-7.5): "))],
+    'slope': [int(input("Slope (0-2): "))],
+    'ca': [int(input("Number of Major Vessels (0-3): "))],
+    'thal': [int(input("Thal (1-3): "))]
+}
+
+
+patient_df = pd.DataFrame(patient_data)
+result = model.predict(patient_df)
+
+print("\nPrediction Result:")
+
+print("Predicted Target Value:", result[0]) #If output is 1 =  Disease Detected
+                                            #If output is 0 =  No Disease Detected
+
+if result[0] == 0:
+    print("Patient Status: Healthy (No Heart Disease)")
+else:
+    print("Patient Status: Not Healthy (Heart Disease Detected)")
+
+
+import gradio as gr
+
+# Gradio wrapper function (uses SAME model and logic)
+def gradio_predict(
+    age, sex, cp, trestbps, chol, fbs, restecg,
+    thalach, exang, oldpeak, slope, ca, thal
+):
+    patient_data = {
+        'age': [age],
+        'sex': [sex],
+        'cp': [cp],
+        'trestbps': [trestbps],
+        'chol': [chol],
+        'fbs': [fbs],
+        'restecg': [restecg],
+        'thalach': [thalach],
+        'exang': [exang],
+        'oldpeak': [oldpeak],
+        'slope': [slope],
+        'ca': [ca],
+        'thal': [thal]
+    }
+
+    patient_df = pd.DataFrame(patient_data)
+    result = model.predict(patient_df)
+
+    if result[0] == 0:
+        return "🟢 Healthy (No Heart Disease Detected)"
+    else:
+        return "🔴 Not Healthy (Heart Disease Detected)"
+
+
+# Gradio Interface
+ui = gr.Interface(
+    fn=gradio_predict,
+    inputs=[
+        gr.Slider(20, 80, step=1, label="Age"),
+        gr.Radio([0, 1], label="Sex (0 = Female, 1 = Male)"),
+        gr.Dropdown([0, 1, 2, 3], label="Chest Pain Type (cp)"),
+        gr.Slider(80, 200, step=1, label="Resting Blood Pressure"),
+        gr.Slider(100, 400, step=1, label="Cholesterol"),
+        gr.Radio([0, 1], label="Fasting Blood Sugar (1 = Yes, 0 = No)"),
+        gr.Dropdown([0, 1, 2], label="Rest ECG"),
+        gr.Slider(60, 220, step=1, label="Max Heart Rate"),
+        gr.Radio([0, 1], label="Exercise Induced Angina"),
+        gr.Slider(0.0, 6.0, step=0.1, label="ST Depression (oldpeak)"),
+        gr.Dropdown([0, 1, 2], label="Slope"),
+        gr.Dropdown([0, 1, 2, 3], label="Number of Major Vessels (ca)"),
+        gr.Dropdown([1, 2, 3], label="Thal")
+    ],
+    outputs=gr.Textbox(label="Prediction Result"),
+    title="❤️ Heart Disease Prediction System",
+    description="Machine Learning based Heart Disease Prediction using Random Forest"
+)
+
+ui.launch()
